@@ -26,17 +26,9 @@ type Transaction struct {
 type BankStatementLine struct {
 	UniqueIdentifier string
 	Amount           decimal.Decimal // Can be negative for debit
+	Type             TransactionType // Derived from amount sign
 	Date             time.Time
 	BankName         string
-}
-
-// GetTransactionType derives the transaction type from amount
-// Negative amounts are DEBIT, positive are CREDIT
-func (bs *BankStatementLine) GetTransactionType() TransactionType {
-	if bs.Amount.IsNegative() {
-		return TransactionTypeDebit
-	}
-	return TransactionTypeCredit
 }
 
 // GetAbsoluteAmount returns the absolute value of the amount
