@@ -9,6 +9,7 @@
 ### Additional Assumption
 - Each bank provides statements in standardized CSV format
 - Transaction can only be one day difference (cutoff time)
+- All date are using UTC+7
 - One CSV can contains multiple date transactions
 - Transaction has one-to-one relationship
 - Transaction matching is based on date (±1 day for cutoff time) and amount
