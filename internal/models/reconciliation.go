@@ -17,13 +17,6 @@ type ReconciliationResult struct {
 	TotalDiscrepancies          decimal.Decimal
 }
 
-// DiscrepantTransaction represents a matched transaction with amount discrepancy
-type DiscrepantTransaction struct {
-	SystemTransaction Transaction
-	BankStatement     BankStatementLine
-	Difference        decimal.Decimal
-}
-
 // Print outputs a formatted reconciliation summary
 func (r *ReconciliationResult) Print() {
 	fmt.Println("\n" + strings.Repeat("=", 80))
