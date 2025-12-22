@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-// parseDate tries to parse date/datetime in multiple formats
-func parseDate(dateStr string) (time.Time, error) {
+// parseDate tries to parse date/datetime in multiple formats with given timezone
+func parseDate(dateStr string, loc *time.Location) (time.Time, error) {
 	formats := []string{
 		// DateTime formats with time component
 		"2006-01-02 15:04:05",
@@ -26,7 +26,7 @@ func parseDate(dateStr string) (time.Time, error) {
 	}
 
 	for _, format := range formats {
-		if t, err := time.Parse(format, dateStr); err == nil {
+		if t, err := time.ParseInLocation(format, dateStr, loc); err == nil {
 			return t, nil
 		}
 	}

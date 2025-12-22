@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/shopspring/decimal"
 
@@ -10,12 +11,20 @@ import (
 
 // BankStatementLineParser handles parsing of bank statement CSV files
 type BankStatementLineParser struct {
-	// Future: timezone, date format preferences, etc.
+	timezone *time.Location
 }
 
-// NewBankStatementLineParser creates a new BankStatementLineParser
+// NewBankStatementLineParser creates a new BankStatementLineParser with UTC+7 timezone
 func NewBankStatementLineParser() *BankStatementLineParser {
-	return &BankStatementLineParser{}
+	// Load Asia/Jakarta timezone (UTC+7) by default
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		// Fallback to fixed offset if timezone database unavailable
+		loc = time.FixedZone("UTC+7", 7*60*60)
+	}
+	return &BankStatementLineParser{
+		timezone: loc,
+	}
 }
 
 // ParseCSV reads and parses a bank statement CSV file
@@ -42,7 +51,7 @@ func (p *BankStatementLineParser) ParseCSV(filePath string) ([]models.BankStatem
 			return nil, fmt.Errorf("invalid amount at row %d: %w", i+2, err)
 		}
 
-		date, err := parseDate(record[bankStatementColDate])
+		date, err := parseDate(record[bankStatementColDate], p.timezone)
 		if err != nil {
 			return nil, fmt.Errorf("invalid date at row %d: %w", i+2, err)
 		}

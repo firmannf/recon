@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/shopspring/decimal"
 
@@ -10,12 +11,20 @@ import (
 
 // TransactionParser handles parsing of system transaction CSV files
 type TransactionParser struct {
-	// Future: timezone, date format preferences, etc.
+	timezone *time.Location
 }
 
-// NewTransactionParser creates a new TransactionParser
+// NewTransactionParser creates a new TransactionParser with UTC+7 timezone
 func NewTransactionParser() *TransactionParser {
-	return &TransactionParser{}
+	// Load Asia/Jakarta timezone (UTC+7) by default
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		// Fallback to fixed offset if timezone database unavailable
+		loc = time.FixedZone("UTC+7", 7*60*60)
+	}
+	return &TransactionParser{
+		timezone: loc,
+	}
 }
 
 // ParseCSV reads and parses a transaction CSV file
@@ -45,7 +54,7 @@ func (p *TransactionParser) ParseCSV(filePath string) ([]models.Transaction, err
 		}
 
 		// Try multiple date formats
-		transactionTime, err := parseDate(record[transactionColTransactionTime])
+		transactionTime, err := parseDate(record[transactionColTransactionTime], p.timezone)
 		if err != nil {
 			return nil, fmt.Errorf("invalid transaction time at row %d: %w", i+2, err)
 		}
