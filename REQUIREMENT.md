@@ -35,7 +35,7 @@ THEN the system should accept all bank statement files
 ```
 
 ```
-GIVEN a CSV file with dates in supported format YYYY-MM-DD, DD/MM/YYYY, YYYY-MM-DD HH:MM:SS
+GIVEN a CSV file with dates in supported format YYYY-MM-DD, DD/MM/YYYY, YYYY-MM-DD HH:MM:SS, DD/MM/YYYY HH:MM:SS
 WHEN the system parses the transaction time field
 THEN the system should correctly interpret the date
 ```
@@ -44,6 +44,13 @@ THEN the system should correctly interpret the date
 GIVEN a file path that does not exist
 WHEN the system attempts to open the file
 THEN the system should detect the file access error
+    AND the system should display a clear error message
+```
+
+```
+GIVEN a file path with non CSV ectention
+WHEN the system attempts to open the file
+THEN the system should not proceed with reconciliation
     AND the system should display a clear error message
 ```
 
