@@ -304,8 +304,8 @@ BCA-001,1000.00,2024-01-15`
 			// Verify bank counts if specified
 			if len(tt.expectedBankCounts) > 0 {
 				bankCounts := make(map[string]int)
-				for _, line := range statementLines {
-					bankCounts[line.BankName]++
+				for _, stmtLine := range statementLines {
+					bankCounts[stmtLine.BankName]++
 				}
 
 				for bankName, expectedCount := range tt.expectedBankCounts {
