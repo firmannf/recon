@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/shopspring/decimal"
 
@@ -42,7 +43,7 @@ func (p *BankStatementLineParser) ParseCSV(filePath string) ([]models.BankStatem
 
 	// Skip header row
 	for i, record := range records[1:] {
-		if len(record) < bankStatementColumnCount {
+		if len(record) != bankStatementColumnCount {
 			return nil, fmt.Errorf("invalid record at row %d: expected %d columns, got %d", i+2, bankStatementColumnCount, len(record))
 		}
 
