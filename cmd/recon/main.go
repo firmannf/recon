@@ -101,6 +101,7 @@ func main() {
 		StartDate:             start,
 		EndDate:               end,
 		OutputFile:            outputFile,
+		MatchStrategy:         service.NewExactMatchStrategy(),
 	}
 
 	result, err := reconService.Reconcile(input)
