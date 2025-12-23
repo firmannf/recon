@@ -27,6 +27,7 @@ type ReconciliationInput struct {
 	StartDate             time.Time
 	EndDate               time.Time
 	OutputFile            string
+	MatchStrategy         MatchStrategy // Strategy for matching transactions
 }
 
 // Reconcile performs the reconciliation process
@@ -58,7 +59,7 @@ func (s *ReconciliationService) Reconcile(input ReconciliationInput) (*models.Re
 	)
 
 	// Perform reconciliation
-	result := s.performReconciliation(systemTransactions, bankStatements)
+	result := s.performReconciliation(systemTransactions, bankStatements, input.MatchStrategy)
 
 	return result, nil
 }
@@ -66,13 +67,22 @@ func (s *ReconciliationService) Reconcile(input ReconciliationInput) (*models.Re
 func (s *ReconciliationService) performReconciliation(
 	systemTxs []models.Transaction,
 	bankStmts []models.BankStatementLine,
+	matchStrategy MatchStrategy,
 ) *models.ReconciliationResult {
 	result := &models.ReconciliationResult{
 		UnmatchedBankStatementLines: make(map[string][]models.BankStatementLine),
 		TotalDiscrepancies:          decimal.Zero,
 	}
 
-	// Track which transactions and statements have been matched
+	// Build index of bank statements by matching key for O(1) lookup
+	// Key format depends on strategy (e.g., "TYPE_AMOUNT_DATE", "TYPE_DATE", "ID", etc.)
+	bankStmtIndex := make(map[string][]int)
+	for bankIdx, bankStmt := range bankStmts {
+		key := matchStrategy.BuildKey(bankStmt.Type, bankStmt.GetAbsoluteAmount(), bankStmt.Date, bankStmt.UniqueIdentifier)
+		bankStmtIndex[key] = append(bankStmtIndex[key], bankIdx)
+	}
+
+	// Track which statements have been matched
 	matchedSystemTxs := make(map[int]bool)
 	matchedBankStmts := make(map[int]bool)
 
@@ -80,20 +90,28 @@ func (s *ReconciliationService) performReconciliation(
 	for sysIdx, sysTrx := range systemTxs {
 		matched := false
 
-		for bankIdx, bankStmt := range bankStmts {
-			// Skip already matched bank statements
-			if matchedBankStmts[bankIdx] {
-				continue
-			}
+		// Look up potential matches using index - O(1) instead of O(m)
+		key := matchStrategy.BuildKey(sysTrx.Type, sysTrx.Amount, sysTrx.TransactionTime, sysTrx.TrxID)
+		if candidates, exists := bankStmtIndex[key]; exists {
+			for _, bankIdx := range candidates {
+				// Skip already matched bank statements
+				if matchedBankStmts[bankIdx] {
+					continue
+				}
 
-			if s.isMatch(sysTrx, bankStmt) {
+				// Validate match using strategy (for tolerance checking, etc.)
+				if !matchStrategy.IsMatch(sysTrx, bankStmts[bankIdx]) {
+					continue
+				}
+
+				// Found a match (first available candidate)
 				matched = true
 				matchedSystemTxs[sysIdx] = true
 				matchedBankStmts[bankIdx] = true
 				result.TotalMatchedTransactions++
 
 				// Check for amount discrepancies
-				bankAbsAmount := bankStmt.GetAbsoluteAmount()
+				bankAbsAmount := bankStmts[bankIdx].GetAbsoluteAmount()
 				diff := sysTrx.Amount.Sub(bankAbsAmount).Abs()
 
 				// This always zero since isMatch checks for exact amount match
@@ -132,29 +150,6 @@ func (s *ReconciliationService) performReconciliation(
 	}
 
 	return result
-}
-
-// isMatch determines if a system transaction matches a bank statement
-func (s *ReconciliationService) isMatch(sysTrx models.Transaction, bankStmt models.BankStatementLine) bool {
-	// Check transaction type
-	if sysTrx.Type != bankStmt.Type {
-		return false
-	}
-
-	// Check amount (exact match)
-	bankAbsAmount := bankStmt.GetAbsoluteAmount()
-	if !sysTrx.Amount.Equal(bankAbsAmount) {
-		return false
-	}
-
-	// Check date (exact match - same day)
-	sysTrxDate := time.Date(sysTrx.TransactionTime.Year(), sysTrx.TransactionTime.Month(), sysTrx.TransactionTime.Day(), 0, 0, 0, 0, sysTrx.TransactionTime.Location())
-	bankStmtDate := time.Date(bankStmt.Date.Year(), bankStmt.Date.Month(), bankStmt.Date.Day(), 0, 0, 0, 0, bankStmt.Date.Location())
-	if !sysTrxDate.Equal(bankStmtDate) {
-		return false
-	}
-
-	return true
 }
 
 func (s *ReconciliationService) filterTransactionsByDateRange(transactions []models.Transaction, startDate, endDate time.Time) []models.Transaction {

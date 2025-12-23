@@ -7,8 +7,8 @@
 - Discrepancies only occur in amount
 
 ### Additional Assumption
-- Each bank provides statements in standardized CSV format
-- System transaction data is in standardized CSV format
+- Each bank provides statements in standardized CSV format and the data already sorted
+- System transaction data is in standardized CSV format and the data already sorted
 - All date are using UTC+7
 - All amount are using Indonesian Rupiah and only 2 max decimal points
 - One CSV can contains multiple date transactions
@@ -237,4 +237,8 @@ THEN the system only log the results in the console
 - Requires Go 1.23 or higher
 - No external system dependencies
 - Single binary deployment
+
+---
+
+## Future Improvements
   
