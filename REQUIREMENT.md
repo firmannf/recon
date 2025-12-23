@@ -10,7 +10,7 @@
 - Each bank provides statements in standardized CSV format
 - System transaction data is in standardized CSV format
 - All date are using UTC+7
-- All amount are using Indonesian Rupiah
+- All amount are using Indonesian Rupiah and only 2 max decimal points
 - One CSV can contains multiple date transactions
 - Transaction only has one-to-one relationship
 - Transaction IDs between system and bank cannot be relied upon for matching
