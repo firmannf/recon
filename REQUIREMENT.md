@@ -14,9 +14,12 @@
 - One CSV can contains multiple date transactions
 - Transaction only has one-to-one relationship
 - Transaction IDs between system and bank cannot be relied upon for matching
-- Transaction matching is based on amount since
+- Transaction matching is based on amount
 - Transactions are reconciled within the same calendar date unless later introduced function for handling cutoff period time
 - Transaction type (CREDIT, DEBIT) in system transaction data are the same with bank's point of view (Credit +, Debit -)
+- Transaction processed count is total of rows in system transaction and bank statement
+- Transaction matched count always comes in pairs
+- Transaction unmatched count is individual missing records in system transaction and bank statement
 - A discrepancy is defined as an amount difference between matched transactions, however since amount is used for matching, this value should be zero unless a tolerance-based strategy is later introduced
 - System handles multiple banks in a single reconciliation run
   
@@ -106,13 +109,13 @@ THEN TRX001 should match with BANK_BCA_001 (first encountered)
 ```
 GIVEN 10 transaction in system transaction data and 9 transactions in bank statement in the date range
 WHEN the reconciliation completes
-THEN the report should display "Total Transactions Processed: 10"
+THEN the report should display "Total Transactions Processed: 19"
 ```
 
 ```
-GIVEN 10 transactions were matched successfully
+GIVEN 10 transactions (5 in system, 5 in banks) were matched successfully 
 WHEN the report is generated
-THEN the report should display "Total Matched Transactions: 10"
+THEN the report should display "Total Matched Transactions: 5 pairs"
 ```
 
 ```
@@ -152,7 +155,7 @@ GIVEN an unmatched system transaction:
   | TRX001 | 1000.00 | CREDIT | 2024-01-15 10:30:00 |
 WHEN the report is generated
 THEN the report should include a detailed table
-    AND the table should show TrxID, Amount, Type, and Transaction Time
+    AND the table should show TrxID, Type, Transaction Time, Amount
 ```
 
 ```
@@ -160,7 +163,7 @@ GIVEN unmatched bank statements from "bank_bca" and "bank_mandiri"
 WHEN the report is generated
 THEN statements should be grouped under bank headers
     AND each group should show "Bank: <bank_name> (N transactions)"
-    AND the table should show Unique Identifier, Amount, and Date
+    AND the table should show Unique Identifier, Date, Amount
 ```
 
 ```
