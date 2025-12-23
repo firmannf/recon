@@ -77,15 +77,15 @@ func (p *BankStatementParser) ParseCSV(filePath string) ([]models.BankStatementL
 
 // ParseMultipleCSVs reads and parses multiple bank statement CSV files
 func (p *BankStatementParser) ParseMultipleCSVs(filePaths []string) ([]models.BankStatementLine, error) {
-	var allStatements []models.BankStatementLine
+	var allStatementLines []models.BankStatementLine
 
 	for _, filePath := range filePaths {
-		statements, err := p.ParseCSV(filePath)
+		statementLines, err := p.ParseCSV(filePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse %s: %w", filePath, err)
 		}
-		allStatements = append(allStatements, statements...)
+		allStatementLines = append(allStatementLines, statementLines...)
 	}
 
-	return allStatements, nil
+	return allStatementLines, nil
 }

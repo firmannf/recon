@@ -11,14 +11,14 @@ import (
 	"github.com/firmannf/recon/internal/parser"
 )
 
-func TestBankStatementLineParser_ParseCSV_Success(t *testing.T) {
+func TestBankStatementParser_ParseCSV_Success(t *testing.T) {
 	tests := []struct {
 		name             string
 		csvContent       string
 		fileName         string
 		expectedCount    int
 		expectedBankName string
-		verify           func(t *testing.T, statements []models.BankStatementLine)
+		verify           func(t *testing.T, statementLines []models.BankStatementLine)
 	}{
 		{
 			name: "multiple statements",
@@ -28,21 +28,21 @@ BANK-002,-250,2024-01-16`,
 			fileName:         "bank_bca.csv",
 			expectedCount:    2,
 			expectedBankName: "bank_bca",
-			verify: func(t *testing.T, statements []models.BankStatementLine) {
-				if statements[0].UniqueIdentifier != "BANK-001" {
-					t.Errorf("Expected ID 'BANK-001', got '%s'", statements[0].UniqueIdentifier)
+			verify: func(t *testing.T, statementLines []models.BankStatementLine) {
+				if statementLines[0].UniqueIdentifier != "BANK-001" {
+					t.Errorf("Expected ID 'BANK-001', got '%s'", statementLines[0].UniqueIdentifier)
 				}
-				if !statements[0].Amount.Equal(decimal.NewFromFloat(1000.50)) {
-					t.Errorf("Expected amount 1000.50, got %s", statements[0].Amount)
+				if !statementLines[0].Amount.Equal(decimal.NewFromFloat(1000.50)) {
+					t.Errorf("Expected amount 1000.50, got %s", statementLines[0].Amount)
 				}
-				if !statements[1].Amount.Equal(decimal.NewFromFloat(-250)) {
-					t.Errorf("Expected amount 250, got %s", statements[1].Amount)
+				if !statementLines[1].Amount.Equal(decimal.NewFromFloat(-250)) {
+					t.Errorf("Expected amount 250, got %s", statementLines[1].Amount)
 				}
-				if statements[0].Type != models.TransactionTypeCredit {
-					t.Errorf("Expected CREDIT, got %s", statements[0].Type)
+				if statementLines[0].Type != models.TransactionTypeCredit {
+					t.Errorf("Expected CREDIT, got %s", statementLines[0].Type)
 				}
-				if statements[1].Type != models.TransactionTypeDebit {
-					t.Errorf("Expected DEBIT, got %s", statements[1].Type)
+				if statementLines[1].Type != models.TransactionTypeDebit {
+					t.Errorf("Expected DEBIT, got %s", statementLines[1].Type)
 				}
 			},
 		},
@@ -61,9 +61,9 @@ BANK-001,1000.00,2024-01-15`,
 			fileName:         "bank.csv",
 			expectedCount:    1,
 			expectedBankName: "bank",
-			verify: func(t *testing.T, statements []models.BankStatementLine) {
-				if statements[0].Date.Year() != 2024 || statements[0].Date.Day() != 15 {
-					t.Errorf("Expected 2024-01-15, got %v", statements[0].Date)
+			verify: func(t *testing.T, statementLines []models.BankStatementLine) {
+				if statementLines[0].Date.Year() != 2024 || statementLines[0].Date.Day() != 15 {
+					t.Errorf("Expected 2024-01-15, got %v", statementLines[0].Date)
 				}
 			},
 		},
@@ -74,9 +74,9 @@ BANK-001,1000.00,15/01/2024`,
 			fileName:         "bank.csv",
 			expectedCount:    1,
 			expectedBankName: "bank",
-			verify: func(t *testing.T, statements []models.BankStatementLine) {
-				if statements[0].Date.Year() != 2024 || statements[0].Date.Day() != 15 {
-					t.Errorf("Expected 2024-01-15, got %v", statements[0].Date)
+			verify: func(t *testing.T, statementLines []models.BankStatementLine) {
+				if statementLines[0].Date.Year() != 2024 || statementLines[0].Date.Day() != 15 {
+					t.Errorf("Expected 2024-01-15, got %v", statementLines[0].Date)
 				}
 			},
 		},
@@ -87,9 +87,9 @@ BANK-001,1000.00,15-01-2024`,
 			fileName:         "bank.csv",
 			expectedCount:    1,
 			expectedBankName: "bank",
-			verify: func(t *testing.T, statements []models.BankStatementLine) {
-				if statements[0].Date.Year() != 2024 || statements[0].Date.Day() != 15 {
-					t.Errorf("Expected 2024-01-15, got %v", statements[0].Date)
+			verify: func(t *testing.T, statementLines []models.BankStatementLine) {
+				if statementLines[0].Date.Year() != 2024 || statementLines[0].Date.Day() != 15 {
+					t.Errorf("Expected 2024-01-15, got %v", statementLines[0].Date)
 				}
 			},
 		},
@@ -105,28 +105,28 @@ BANK-001,1000.00,15-01-2024`,
 			}
 
 			parser := parser.NewBankStatementParser()
-			statements, err := parser.ParseCSV(csvPath)
+			statementLines, err := parser.ParseCSV(csvPath)
 
 			if err != nil {
 				t.Fatalf("Expected successful parse, got error: %v", err)
 			}
 
-			if len(statements) != tt.expectedCount {
-				t.Fatalf("Expected %d statements, got %d", tt.expectedCount, len(statements))
+			if len(statementLines) != tt.expectedCount {
+				t.Fatalf("Expected %d statements, got %d", tt.expectedCount, len(statementLines))
 			}
 
-			if statements[0].BankName != tt.expectedBankName {
-				t.Errorf("Expected bank name '%s', got '%s'", tt.expectedBankName, statements[0].BankName)
+			if statementLines[0].BankName != tt.expectedBankName {
+				t.Errorf("Expected bank name '%s', got '%s'", tt.expectedBankName, statementLines[0].BankName)
 			}
 
 			if tt.verify != nil {
-				tt.verify(t, statements)
+				tt.verify(t, statementLines)
 			}
 		})
 	}
 }
 
-func TestBankStatementLineParser_ParseCSV_ErrorCases(t *testing.T) {
+func TestBankStatementParser_ParseCSV_ErrorCases(t *testing.T) {
 	tests := []struct {
 		name       string
 		setupFile  func(tmpDir string) string
@@ -284,7 +284,7 @@ BCA-001,1000.00,2024-01-15`
 			files := tt.setupFiles(tmpDir)
 
 			parser := parser.NewBankStatementParser()
-			statements, err := parser.ParseMultipleCSVs(files)
+			statementLines, err := parser.ParseMultipleCSVs(files)
 
 			if tt.shouldFail {
 				if err == nil {
@@ -297,14 +297,14 @@ BCA-001,1000.00,2024-01-15`
 				t.Fatalf("Expected no error, got: %v", err)
 			}
 
-			if len(statements) != tt.expectedCount {
-				t.Errorf("Expected %d statements, got %d", tt.expectedCount, len(statements))
+			if len(statementLines) != tt.expectedCount {
+				t.Errorf("Expected %d statements, got %d", tt.expectedCount, len(statementLines))
 			}
 
 			// Verify bank counts if specified
 			if len(tt.expectedBankCounts) > 0 {
 				bankCounts := make(map[string]int)
-				for _, stmt := range statements {
+				for _, stmt := range statementLines {
 					bankCounts[stmt.BankName]++
 				}
 
