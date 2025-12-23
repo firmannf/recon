@@ -6,6 +6,8 @@ import (
 
 // ReconciliationResult represents the result of a reconciliation process
 type ReconciliationResult struct {
+	TotalSystemTransactions     int
+	TotalBankStatementLines     int
 	TotalTransactionsProcessed  int
 	TotalMatchedTransactions    int
 	TotalUnmatchedTransactions  int
