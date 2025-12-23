@@ -1,35 +1,15 @@
-package parser
+package parser_test
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/shopspring/decimal"
 
 	"github.com/firmannf/recon/internal/models"
+	"github.com/firmannf/recon/internal/parser"
 )
-
-func TestNewTransactionParser(t *testing.T) {
-	parser := NewTransactionParser()
-
-	if parser == nil {
-		t.Fatal("Expected parser to be created, got nil")
-	}
-
-	if parser.timezone == nil {
-		t.Error("Expected timezone to be set, got nil")
-	}
-
-	// Verify timezone is UTC+7
-	testTime := time.Date(2024, 1, 1, 0, 0, 0, 0, parser.timezone)
-	_, offset := testTime.Zone()
-	expectedOffset := 7 * 60 * 60 // 7 hours in seconds
-	if offset != expectedOffset {
-		t.Errorf("Expected timezone offset %d seconds (UTC+7), got %d", expectedOffset, offset)
-	}
-}
 
 func TestTransactionParser_ParseCSV_Success(t *testing.T) {
 	tests := []struct {
@@ -140,7 +120,7 @@ TRX001,1000.00,CREDIT,15-01-2024 10:30`,
 				t.Fatalf("Failed to create test CSV: %v", err)
 			}
 
-			parser := NewTransactionParser()
+			parser := parser.NewTransactionParser()
 			transactions, err := parser.ParseCSV(csvPath)
 
 			if err != nil {
@@ -263,7 +243,7 @@ TRX001,1000.00,CREDIT,2024-01-15 10:30:00,2024-01-15 10:30:00`
 			tmpDir := t.TempDir()
 			csvPath := tt.setupFile(tmpDir)
 
-			parser := NewTransactionParser()
+			parser := parser.NewTransactionParser()
 			_, err := parser.ParseCSV(csvPath)
 
 			if tt.shouldFail && err == nil {

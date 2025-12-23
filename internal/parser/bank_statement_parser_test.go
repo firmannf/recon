@@ -1,4 +1,4 @@
-package parser
+package parser_test
 
 import (
 	"os"
@@ -8,6 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 
 	"github.com/firmannf/recon/internal/models"
+	"github.com/firmannf/recon/internal/parser"
 )
 
 func TestBankStatementLineParser_ParseCSV_Success(t *testing.T) {
@@ -103,7 +104,7 @@ BANK-001,1000.00,15-01-2024`,
 				t.Fatalf("Failed to create test CSV: %v", err)
 			}
 
-			parser := NewBankStatementLineParser()
+			parser := parser.NewBankStatementLineParser()
 			statements, err := parser.ParseCSV(csvPath)
 
 			if err != nil {
@@ -209,7 +210,7 @@ BANK-003,250.00,2024-01-17,2024-01-17`
 			tmpDir := t.TempDir()
 			csvPath := tt.setupFile(tmpDir)
 
-			parser := NewBankStatementLineParser()
+			parser := parser.NewBankStatementLineParser()
 			_, err := parser.ParseCSV(csvPath)
 
 			if tt.shouldFail && err == nil {
@@ -282,7 +283,7 @@ BCA-001,1000.00,2024-01-15`
 			tmpDir := t.TempDir()
 			files := tt.setupFiles(tmpDir)
 
-			parser := NewBankStatementLineParser()
+			parser := parser.NewBankStatementLineParser()
 			statements, err := parser.ParseMultipleCSVs(files)
 
 			if tt.shouldFail {
