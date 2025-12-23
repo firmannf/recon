@@ -111,10 +111,7 @@ func main() {
 
 	// Run reconciliation
 	fmt.Println("Starting reconciliation process...")
-	fmt.Printf("System Transactions: %s\n", params.SystemFile)
-	fmt.Printf("Bank Statements: %s\n", strings.Join(bankFileList, ", "))
-	fmt.Printf("Date Range: %s to %s\n", start.Format(DEFAULT_DATE_FORMAT), end.Format(DEFAULT_DATE_FORMAT))
-	fmt.Printf("Output file: %s\n", params.OutputFile)
+	startTime := time.Now()
 	reconService := service.NewReconciliationService()
 
 	input := service.ReconciliationInput{
@@ -143,10 +140,11 @@ func main() {
 	}
 
 	// Exit with additional info
+	elapsed := time.Since(startTime)
 	if result.TotalUnmatchedTransactions > 0 || result.TotalDiscrepancies.GreaterThan(decimal.Zero) {
-		fmt.Println("\nReconciliation completed successfully - There are UNMATCHED transactions or discrepancies.")
+		fmt.Printf("\nReconciliation completed successfully - There are UNMATCHED transactions or discrepancies. (Processing Time: %v)\n", elapsed)
 	} else {
-		fmt.Println("\nReconciliation completed successfully - All transactions MATCHED!")
+		fmt.Printf("\nReconciliation completed successfully - All transactions MATCHED! (Processing Time: %v)\n", elapsed)
 	}
 	os.Exit(0)
 }
