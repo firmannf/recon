@@ -24,6 +24,7 @@ git clone https://github.com/firmannf/recon.git
 
 2. Build the application:
 ```bash
+make deps
 make build
 ```
 
