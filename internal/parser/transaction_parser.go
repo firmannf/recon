@@ -2,7 +2,9 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/shopspring/decimal"
 
@@ -39,7 +41,7 @@ func (p *TransactionParser) ParseCSV(filePath string) ([]models.Transaction, err
 
 	// Skip header row
 	for i, record := range records[1:] {
-		if len(record) < transactionColumnCount {
+		if len(record) != transactionColumnCount {
 			return nil, fmt.Errorf("invalid record at row %d: expected %d columns, got %d", i+2, transactionColumnCount, len(record))
 		}
 
@@ -48,7 +50,7 @@ func (p *TransactionParser) ParseCSV(filePath string) ([]models.Transaction, err
 			return nil, fmt.Errorf("invalid amount at row %d: %w", i+2, err)
 		}
 
-		txType := models.TransactionType(record[transactionColType])
+		txType := models.TransactionType(strings.ToUpper(record[transactionColType]))
 		if txType != models.TransactionTypeDebit && txType != models.TransactionTypeCredit {
 			return nil, fmt.Errorf("invalid transaction type at row %d: %s", i+2, record[transactionColType])
 		}
