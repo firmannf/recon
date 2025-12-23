@@ -25,7 +25,7 @@ func main() {
 		fSystemFile = flag.String("system", "", "Path to system transactions CSV file (required)")
 		fBankFiles  = flag.String("banks", "", "Comma-separated paths to bank statement CSV files (required)")
 		fStartDate  = flag.String("start", "", "Start date for reconciliation (YYYY-MM-DD) (required)")
-		fEndDate    = flag.String("end", "", "End date for reconciliation (YYYY-MM-DD) (required)")
+		fEndDate    = flag.String("end", "", "End date for reconciliation (YYYY-MM-DD) (optional, defaults to start date)")
 		fOutputFile = flag.String("output", "", "Path to output file, only support txt at the moment. (optional)")
 	)
 
@@ -48,7 +48,7 @@ func main() {
 	outputFile := *fOutputFile
 
 	// Validate required flags
-	if systemFile == "" || bankFiles == "" || startDate == "" || endDate == "" {
+	if systemFile == "" || bankFiles == "" || startDate == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -58,17 +58,23 @@ func main() {
 	if err != nil {
 		log.Fatalf("Invalid start date format: %v. Expected format: YYYY-MM-DD", err)
 	}
-	end, err := time.Parse(DEFAULT_DATE_FORMAT, endDate)
-	if err != nil {
-		log.Fatalf("Invalid end date format: %v. Expected format: YYYY-MM-DD", err)
-	}
 
-	// Set end date to end of day
-	end = end.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+	var end time.Time
+	if endDate != "" {
+		end, err = time.Parse(DEFAULT_DATE_FORMAT, endDate)
+		if err != nil {
+			log.Fatalf("Invalid end date format: %v. Expected format: YYYY-MM-DD", err)
+		}
+		// Set end date to end of day
+		end = end.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 
-	// Validate date range
-	if end.Before(start) {
-		log.Fatalf("End date must be after start date")
+		// Validate date range
+		if start.After(end) {
+			log.Fatalf("Start date must not be after end date")
+		}
+	} else {
+		// If no end date provided, set to end of start day
+		end = start.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 	}
 
 	// Split bank files

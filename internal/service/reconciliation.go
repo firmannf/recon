@@ -27,11 +27,21 @@ type ReconciliationInput struct {
 	StartDate             time.Time
 	EndDate               time.Time
 	OutputFile            string
-	MatchStrategy         MatchStrategy // Strategy for matching transactions
+	MatchStrategy         MatchStrategy
 }
 
 // Reconcile performs the reconciliation process
 func (s *ReconciliationService) Reconcile(input ReconciliationInput) (*models.ReconciliationResult, error) {
+	// If end date is not provided (zero value), set it to start date
+	if input.EndDate.IsZero() {
+		input.EndDate = input.StartDate
+	}
+
+	// Validate date range
+	if input.StartDate.After(input.EndDate) {
+		return nil, fmt.Errorf("start date must not be after end date")
+	}
+
 	// Parse system transactions
 	systemTransactions, err := s.transactionParser.ParseCSV(input.SystemTransactionFile)
 	if err != nil {
