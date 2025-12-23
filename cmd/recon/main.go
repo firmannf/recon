@@ -20,6 +20,14 @@ const (
 	DEFAULT_DATE_FORMAT = "2006-01-02"
 )
 
+type ReconciliationParams struct {
+	SystemFile string
+	BankFiles  string
+	StartDate  string
+	EndDate    string
+	OutputFile string
+}
+
 func main() {
 	// Define CLI flags
 	var (
@@ -42,14 +50,15 @@ func main() {
 
 	flag.Parse()
 
-	systemFile := *fSystemFile
-	bankFiles := *fBankFiles
-	startDate := *fStartDate
-	endDate := *fEndDate
-	outputFile := *fOutputFile
-
+	params := ReconciliationParams{
+		SystemFile: *fSystemFile,
+		BankFiles:  *fBankFiles,
+		StartDate:  *fStartDate,
+		EndDate:    *fEndDate,
+		OutputFile: *fOutputFile,
+	}
 	// Validate required flags
-	if systemFile == "" || bankFiles == "" || startDate == "" {
+	if params.SystemFile == "" || params.BankFiles == "" || params.StartDate == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -61,14 +70,14 @@ func main() {
 	}
 
 	// Parse dates
-	start, err := time.ParseInLocation(DEFAULT_DATE_FORMAT, startDate, loc)
+	start, err := time.ParseInLocation(DEFAULT_DATE_FORMAT, params.StartDate, loc)
 	if err != nil {
 		log.Fatalf("Invalid start date format: %v. Expected format: YYYY-MM-DD", err)
 	}
 
 	var end time.Time
-	if endDate != "" {
-		end, err = time.ParseInLocation(DEFAULT_DATE_FORMAT, endDate, loc)
+	if params.EndDate != "" {
+		end, err = time.ParseInLocation(DEFAULT_DATE_FORMAT, params.EndDate, loc)
 		if err != nil {
 			log.Fatalf("Invalid end date format: %v. Expected format: YYYY-MM-DD", err)
 		}
@@ -85,13 +94,13 @@ func main() {
 	}
 
 	// Split bank files
-	bankFileList := strings.Split(bankFiles, ",")
+	bankFileList := strings.Split(params.BankFiles, ",")
 	for i, v := range bankFileList {
 		bankFileList[i] = strings.TrimSpace(v)
 	}
 
 	// Validate files exist
-	if err := validateFileExists(systemFile); err != nil {
+	if err := validateFileExists(params.SystemFile); err != nil {
 		log.Fatalf("System transaction file error: %v", err)
 	}
 	for _, bankFile := range bankFileList {
@@ -102,18 +111,18 @@ func main() {
 
 	// Run reconciliation
 	fmt.Println("Starting reconciliation process...")
-	fmt.Printf("System Transactions: %s\n", systemFile)
+	fmt.Printf("System Transactions: %s\n", params.SystemFile)
 	fmt.Printf("Bank Statements: %s\n", strings.Join(bankFileList, ", "))
 	fmt.Printf("Date Range: %s to %s\n", start.Format(DEFAULT_DATE_FORMAT), end.Format(DEFAULT_DATE_FORMAT))
-	fmt.Printf("Output file: %s\n", outputFile)
+	fmt.Printf("Output file: %s\n", params.OutputFile)
 	reconService := service.NewReconciliationService()
 
 	input := service.ReconciliationInput{
-		SystemTransactionFile: systemFile,
+		SystemTransactionFile: params.SystemFile,
 		BankStatementFiles:    bankFileList,
 		StartDate:             start,
 		EndDate:               end,
-		OutputFile:            outputFile,
+		OutputFile:            params.OutputFile,
 		MatchStrategy:         service.NewExactMatchStrategy(),
 	}
 
@@ -123,14 +132,14 @@ func main() {
 	}
 
 	// Print results
-	printResult(result)
+	printResult(result, params)
 
 	// Save to output file if specified
-	if outputFile != "" {
-		if err := writeResultToFile(result, outputFile); err != nil {
+	if params.OutputFile != "" {
+		if err := writeResultToFile(result, params.OutputFile, params); err != nil {
 			log.Fatalf("Failed to write output file: %v", err)
 		}
-		fmt.Printf("\nResults saved to: %s\n", outputFile)
+		fmt.Printf("\nResults saved to: %s\n", params.OutputFile)
 	}
 
 	// Exit with additional info
@@ -156,30 +165,36 @@ func validateFileExists(filePath string) error {
 	return nil
 }
 
-func printResult(result *models.ReconciliationResult) {
-	formatResult(os.Stdout, result)
+func printResult(result *models.ReconciliationResult, params ReconciliationParams) {
+	formatResult(os.Stdout, result, params)
 }
 
-func writeResultToFile(result *models.ReconciliationResult, filepath string) error {
+func writeResultToFile(result *models.ReconciliationResult, filepath string, params ReconciliationParams) error {
 	file, err := os.Create(filepath)
 	if err != nil {
 		return fmt.Errorf("failed to create output file: %w", err)
 	}
 	defer file.Close()
 
-	formatResult(file, result)
+	formatResult(file, result, params)
 	return nil
 }
 
-func formatResult(w io.Writer, result *models.ReconciliationResult) {
+func formatResult(w io.Writer, result *models.ReconciliationResult, params ReconciliationParams) {
 	fmt.Fprintln(w, "\n"+strings.Repeat("=", 80))
 	fmt.Fprintln(w, "TRANSACTION RECONCILIATION SUMMARY")
 	fmt.Fprintln(w, strings.Repeat("=", 80))
 
-	fmt.Fprintf(w, "\nTotal Transactions Processed: %d\n", result.TotalTransactionsProcessed)
-	fmt.Fprintf(w, "Total Matched Transactions: %d\n", result.TotalMatchedTransactions)
-	fmt.Fprintf(w, "Total Unmatched Transactions: %d\n", result.TotalUnmatchedTransactions)
-	fmt.Fprintf(w, "Total Discrepancies (Amount): Rp. %s\n", result.TotalDiscrepancies)
+	fmt.Fprintln(w, "\nReconciliation Parameters:")
+	fmt.Fprintf(w, "  System Transaction File: %s\n", params.SystemFile)
+	fmt.Fprintf(w, "  Bank Statement Files: %s\n", params.BankFiles)
+	fmt.Fprintf(w, "  Date Range: %s to %s\n", params.StartDate, params.EndDate)
+
+	fmt.Fprintln(w, "\nReconciliation Results:")
+	fmt.Fprintf(w, "  Total Transactions Processed: %d\n", result.TotalTransactionsProcessed)
+	fmt.Fprintf(w, "  Total Matched Transactions: %d\n", result.TotalMatchedTransactions)
+	fmt.Fprintf(w, "  Total Unmatched Transactions: %d\n", result.TotalUnmatchedTransactions)
+	fmt.Fprintf(w, "  Total Discrepancies (Amount): Rp. %s\n", result.TotalDiscrepancies)
 
 	// Write unmatched system transactions
 	if len(result.UnmatchedSystemTransactions) > 0 {
