@@ -189,8 +189,8 @@ func formatResult(w io.Writer, result *models.ReconciliationResult, params Recon
 	fmt.Fprintf(w, "  Date Range: %s to %s\n", params.StartDate, params.EndDate)
 
 	fmt.Fprintln(w, "\nReconciliation Results:")
-	fmt.Fprintf(w, "  Total Transactions Processed: %d\n", result.TotalTransactionsProcessed)
-	fmt.Fprintf(w, "  Total Matched Transactions: %d\n", result.TotalMatchedTransactions)
+	fmt.Fprintf(w, "  Total Transactions Processed: %d (System: %d | Bank: %d)\n", result.TotalTransactionsProcessed, result.TotalSystemTransactions, result.TotalBankStatementLines)
+	fmt.Fprintf(w, "  Total Matched Transactions: %d pairs\n", result.TotalMatchedTransactions)
 	fmt.Fprintf(w, "  Total Unmatched Transactions: %d\n", result.TotalUnmatchedTransactions)
 	fmt.Fprintf(w, "  Total Discrepancies (Amount): Rp. %s\n", result.TotalDiscrepancies)
 
