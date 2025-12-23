@@ -102,7 +102,7 @@ func (s *ReconciliationService) performReconciliation(
 					result.TotalDiscrepancies = result.TotalDiscrepancies.Add(diff)
 				}
 
-				break // Move to next system transaction
+				break // Move to next system transaction to avoid multiple matches
 			}
 		}
 
@@ -135,22 +135,22 @@ func (s *ReconciliationService) performReconciliation(
 }
 
 // isMatch determines if a system transaction matches a bank statement
-func (s *ReconciliationService) isMatch(sysTx models.Transaction, bankStmt models.BankStatementLine) bool {
+func (s *ReconciliationService) isMatch(sysTrx models.Transaction, bankStmt models.BankStatementLine) bool {
 	// Check transaction type
-	if sysTx.Type != bankStmt.Type {
+	if sysTrx.Type != bankStmt.Type {
 		return false
 	}
 
 	// Check amount (exact match)
 	bankAbsAmount := bankStmt.GetAbsoluteAmount()
-	if !sysTx.Amount.Equal(bankAbsAmount) {
+	if !sysTrx.Amount.Equal(bankAbsAmount) {
 		return false
 	}
 
 	// Check date (exact match - same day)
-	sysTxDate := time.Date(sysTx.TransactionTime.Year(), sysTx.TransactionTime.Month(), sysTx.TransactionTime.Day(), 0, 0, 0, 0, sysTx.TransactionTime.Location())
+	sysTrxDate := time.Date(sysTrx.TransactionTime.Year(), sysTrx.TransactionTime.Month(), sysTrx.TransactionTime.Day(), 0, 0, 0, 0, sysTrx.TransactionTime.Location())
 	bankStmtDate := time.Date(bankStmt.Date.Year(), bankStmt.Date.Month(), bankStmt.Date.Day(), 0, 0, 0, 0, bankStmt.Date.Location())
-	if !sysTxDate.Equal(bankStmtDate) {
+	if !sysTrxDate.Equal(bankStmtDate) {
 		return false
 	}
 

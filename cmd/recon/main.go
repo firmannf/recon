@@ -3,13 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/firmannf/recon/internal/service"
 	"github.com/shopspring/decimal"
+
+	"github.com/firmannf/recon/internal/models"
+	"github.com/firmannf/recon/internal/service"
 )
 
 const (
@@ -106,7 +109,15 @@ func main() {
 	}
 
 	// Print results
-	result.Print()
+	printResult(result)
+
+	// Save to output file if specified
+	if outputFile != "" {
+		if err := writeResultToFile(result, outputFile); err != nil {
+			log.Fatalf("Failed to write output file: %v", err)
+		}
+		fmt.Printf("\nResults saved to: %s\n", outputFile)
+	}
 
 	// Exit with additional info
 	if result.TotalUnmatchedTransactions > 0 || result.TotalDiscrepancies.GreaterThan(decimal.Zero) {
@@ -129,4 +140,63 @@ func validateFileExists(filePath string) error {
 		return fmt.Errorf("path is a directory, not a file: %s", filePath)
 	}
 	return nil
+}
+
+func printResult(result *models.ReconciliationResult) {
+	formatResult(os.Stdout, result)
+}
+
+func writeResultToFile(result *models.ReconciliationResult, filepath string) error {
+	file, err := os.Create(filepath)
+	if err != nil {
+		return fmt.Errorf("failed to create output file: %w", err)
+	}
+	defer file.Close()
+
+	formatResult(file, result)
+	return nil
+}
+
+func formatResult(w io.Writer, result *models.ReconciliationResult) {
+	fmt.Fprintln(w, "\n"+strings.Repeat("=", 80))
+	fmt.Fprintln(w, "TRANSACTION RECONCILIATION SUMMARY")
+	fmt.Fprintln(w, strings.Repeat("=", 80))
+
+	fmt.Fprintf(w, "\nTotal Transactions Processed: %d\n", result.TotalTransactionsProcessed)
+	fmt.Fprintf(w, "Total Matched Transactions: %d\n", result.TotalMatchedTransactions)
+	fmt.Fprintf(w, "Total Unmatched Transactions: %d\n", result.TotalUnmatchedTransactions)
+	fmt.Fprintf(w, "Total Discrepancies (Amount): Rp. %s\n", result.TotalDiscrepancies)
+
+	// Write unmatched system transactions
+	if len(result.UnmatchedSystemTransactions) > 0 {
+		fmt.Fprintln(w, "\n"+strings.Repeat("-", 80))
+		fmt.Fprintf(w, "UNMATCHED SYSTEM TRANSACTIONS: %d\n", len(result.UnmatchedSystemTransactions))
+		fmt.Fprintln(w, strings.Repeat("-", 80))
+		fmt.Fprintf(w, "%-20s %-10s %-25s %20s \n", "TrxID", "Type", "Transaction Time", "Amount")
+		for _, trx := range result.UnmatchedSystemTransactions {
+			fmt.Fprintf(w, "%-20s %-10s %-25s %20s\n", trx.TrxID, trx.Type, trx.TransactionTime.Format("2006-01-02 15:04:05"), fmt.Sprintf("Rp. %v", trx.Amount.StringFixed(2)))
+		}
+	}
+
+	// Write unmatched bank statements grouped by bank
+	if len(result.UnmatchedBankStatementLines) > 0 {
+		totalUnmatchedBank := 0
+		for _, statements := range result.UnmatchedBankStatementLines {
+			totalUnmatchedBank += len(statements)
+		}
+
+		fmt.Fprintln(w, "\n"+strings.Repeat("-", 80))
+		fmt.Fprintf(w, "UNMATCHED BANK STATEMENTS: %d\n", totalUnmatchedBank)
+		fmt.Fprintln(w, strings.Repeat("-", 80))
+
+		for bankName, statements := range result.UnmatchedBankStatementLines {
+			fmt.Fprintf(w, "\nBank: %s (%d transactions)\n", bankName, len(statements))
+			fmt.Fprintf(w, "%-20s %-10s %20s\n", "Unique Identifier", "Date", "Amount")
+			for _, stmt := range statements {
+				fmt.Fprintf(w, "%-20s %-10s %20s\n", stmt.UniqueIdentifier, stmt.Date.Format("2006-01-02"), fmt.Sprintf("Rp. %v", stmt.Amount.StringFixed(2)))
+			}
+		}
+	}
+
+	fmt.Fprintln(w, "\n"+strings.Repeat("=", 80))
 }
