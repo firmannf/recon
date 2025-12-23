@@ -198,6 +198,13 @@ THEN the system should reject the date range
 ```
 
 ```
+GIVEN start date is "2024-12-31"
+    AND end date is empty
+WHEN the system validates the date range
+THEN the end date should be same with start date
+```
+
+```
 GIVEN start date is "2024-01-01"
     AND end date is "2024-01-31"
     AND a transaction exists on "2024-01-01" at "10:30:00"
