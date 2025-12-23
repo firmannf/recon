@@ -32,7 +32,7 @@ make build
 Run the reconciliation service with the following command:
 
 ```bash
-# Using executable
+# Using binary
 ./bin/recon -system=<path-to-system-csv> \
             -banks=<path-to-bank-csv-1>,<path-to-bank-csv-2> \
             -start=<YYYY-MM-DD> \
