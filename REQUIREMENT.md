@@ -9,6 +9,7 @@
 ### Additional Assumption
 - Each bank provides statements in standardized CSV format and the data already sorted
 - System transaction data is in standardized CSV format and the data already sorted
+- Bank name is derived from filename since it is not specified inside the file
 - All date are using UTC+7
 - All amount are using Indonesian Rupiah and only 2 max decimal points
 - One CSV can contains multiple date transactions
@@ -159,7 +160,7 @@ THEN the report should include a detailed table
 ```
 
 ```
-GIVEN unmatched bank statements from "bank_bca" and "bank_mandiri"
+GIVEN unmatched bank statements from following bank names "bank_bca_20240101", "bank_bca_20240102", and "bank_mandiri"
 WHEN the report is generated
 THEN statements should be grouped under bank headers
     AND each group should show "Bank: <bank_name> (N transactions)"
