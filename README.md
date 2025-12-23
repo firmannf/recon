@@ -97,16 +97,23 @@ The service generates a comprehensive reconciliation report:
 TRANSACTION RECONCILIATION SUMMARY
 ================================================================================
 
-Total Transactions Processed: 10
-Total Matched Transactions: 7
-Total Unmatched Transactions: 3
-Total Discrepancies (Amount): Rp. 0
+Reconciliation Parameters:
+  System Transaction File: testdata/scenario1_all_matched_system.csv
+  Bank Statement Files: testdata/scenario1_all_matched_bank_bca.csv, testdata/scenario1_all_matched_bank_bri.csv
+  Date Range: 2024-01-15 to 2024-01-30
+
+Reconciliation Results:
+  Total Transactions Processed: 20 (System: 10 | Bank: 10)
+  Total Matched Transactions: 8 pairs
+  Total Unmatched Transactions: 4
+  Total Discrepancies (Amount): Rp. 0.00
 
 --------------------------------------------------------------------------------
 UNMATCHED SYSTEM TRANSACTIONS: 1
 --------------------------------------------------------------------------------
 TrxID                Type       Transaction Time          Amount
 TRX005               CREDIT     2024-01-20 11:00:00       Rp. 3000000.00
+TRX006               CREDIT     2024-01-20 11:00:00       Rp. 4000000.00
 
 --------------------------------------------------------------------------------
 UNMATCHED BANK STATEMENTS: 2
