@@ -7,6 +7,9 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/firmannf/recon/internal/service"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -20,8 +23,19 @@ func main() {
 		fBankFiles  = flag.String("banks", "", "Comma-separated paths to bank statement CSV files (required)")
 		fStartDate  = flag.String("start", "", "Start date for reconciliation (YYYY-MM-DD) (required)")
 		fEndDate    = flag.String("end", "", "End date for reconciliation (YYYY-MM-DD) (required)")
-		fOutputFile = flag.String("output", "", "Path to output file (optional)")
+		fOutputFile = flag.String("output", "", "Path to output file, only support txt at the moment. (optional)")
 	)
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Reconciliation Service\n\n")
+		fmt.Fprintf(os.Stderr, "Usage:\n")
+		fmt.Fprintf(os.Stderr, "  %s [options]\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\nExample:\n")
+		fmt.Fprintf(os.Stderr, "  %s -system=transactions.csv -banks=bank_bca.csv/bank_mandiri.csv -start=2024-01-01 -end=2024-12-31 -output=output.txt\n", os.Args[0])
+	}
+
 	flag.Parse()
 
 	systemFile := *fSystemFile
@@ -70,8 +84,36 @@ func main() {
 		}
 	}
 
-	fmt.Println(outputFile)
+	// Run reconciliation
+	fmt.Println("Starting reconciliation process...")
+	fmt.Printf("System Transactions: %s\n", systemFile)
+	fmt.Printf("Bank Statements: %s\n", strings.Join(bankFileList, ", "))
+	fmt.Printf("Date Range: %s to %s\n", start.Format(DEFAULT_DATE_FORMAT), end.Format(DEFAULT_DATE_FORMAT))
+	fmt.Printf("Output file: %s\n", outputFile)
+	reconService := service.NewReconciliationService()
 
+	input := service.ReconciliationInput{
+		SystemTransactionFile: systemFile,
+		BankStatementFiles:    bankFileList,
+		StartDate:             start,
+		EndDate:               end,
+		OutputFile:            outputFile,
+	}
+
+	result, err := reconService.Reconcile(input)
+	if err != nil {
+		log.Fatalf("Reconciliation failed: %v", err)
+	}
+
+	// Print results
+	result.Print()
+
+	// Exit with additional info
+	if result.TotalUnmatchedTransactions > 0 || result.TotalDiscrepancies.GreaterThan(decimal.Zero) {
+		fmt.Println("\nReconciliation completed successfully - There are UNMATCHED transactions or discrepancies.")
+	} else {
+		fmt.Println("\nReconciliation completed successfully - All transactions MATCHED!")
+	}
 	os.Exit(0)
 }
 
