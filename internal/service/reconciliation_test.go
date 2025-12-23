@@ -200,8 +200,8 @@ BANK_BCA_002,-500.50,2024-01-15`), 0644)
 				return systemCSV, []string{bankCSV}
 			},
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 2 {
-					t.Errorf("Expected 2 transactions to be processed, got %d matches", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 4 {
+					t.Errorf("Expected 4 transactions to be processed (2 system + 2 bank), got %d", result.TotalTransactionsProcessed)
 				}
 				if result.TotalMatchedTransactions != 2 {
 					t.Errorf("Expected 2 transactions to match, got %d matches", result.TotalMatchedTransactions)
@@ -236,8 +236,8 @@ BANK_BCA_002,-500.50,2024-01-17`), 0644)
 				return systemCSV, []string{bankCSV}
 			},
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 2 {
-					t.Errorf("Expected 2 transactions to be processed, got %d", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 4 {
+					t.Errorf("Expected 4 transactions to be processed (2 system + 2 bank), got %d", result.TotalTransactionsProcessed)
 				}
 				if result.TotalMatchedTransactions != 0 {
 					t.Errorf("Expected no match with different dates (exact matching), got %d matches", result.TotalMatchedTransactions)
@@ -275,8 +275,8 @@ BANK_BCA_002,1000.00,2024-01-15`), 0644)
 				return systemCSV, []string{bankCSV}
 			},
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 2 {
-					t.Errorf("Expected 2 transactions to be processed (max of 1 system and 2 bank), got %d", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 3 {
+					t.Errorf("Expected 3 transactions to be processed (1 system + 2 bank), got %d", result.TotalTransactionsProcessed)
 				}
 				if result.TotalMatchedTransactions != 1 {
 					t.Errorf("Expected only first match to succeed, got %d matches", result.TotalMatchedTransactions)
@@ -318,8 +318,8 @@ BANK-004,6000.00,2024-01-20`), 0644)
 				return systemCSV, []string{bankCSV}
 			},
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 4 {
-					t.Errorf("Expected 4 transactions to be processed (max of 3 system and 4 bank), got %d", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 7 {
+					t.Errorf("Expected 7 transactions to be processed (3 system + 4 bank), got %d", result.TotalTransactionsProcessed)
 				}
 				if result.TotalMatchedTransactions != 1 {
 					t.Errorf("Expected 1 matched transaction, got %d", result.TotalMatchedTransactions)
@@ -359,8 +359,8 @@ BANK_BCA_003,-500.50,2024-01-15`), 0644)
 				return systemCSV, []string{bankCSV}
 			},
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 3 {
-					t.Errorf("Expected 3 transactions to be processed (max of 3 system and 2 bank), got %d", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 5 {
+					t.Errorf("Expected 5 transactions to be processed (2 system + 3 bank), got %d", result.TotalTransactionsProcessed)
 				}
 				if result.TotalMatchedTransactions != 2 {
 					t.Errorf("Expected 2 matched transaction, got %d", result.TotalMatchedTransactions)
@@ -400,8 +400,8 @@ BANK_BCA_003,-500.50,2024-01-15`), 0644)
 				return systemCSV, []string{bankCSV}
 			},
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 3 {
-					t.Errorf("Expected 3 transactions to be processed (max of 3 system and 2 bank), got %d", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 5 {
+					t.Errorf("Expected 5 transactions to be processed (3 system + 2 bank), got %d", result.TotalTransactionsProcessed)
 				}
 				if result.TotalMatchedTransactions != 2 {
 					t.Errorf("Expected 2 matched transaction, got %d", result.TotalMatchedTransactions)
@@ -442,8 +442,8 @@ MDR-001,3000.00,2024-01-15`), 0644)
 				return systemCSV, []string{bcaCSV, mandiriCSV}
 			},
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 2 {
-					t.Errorf("Expected 2 transactions to be processed (max of 1 system and 2 bank), got %d", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 3 {
+					t.Errorf("Expected 3 transactions to be processed (1 system + 2 bank), got %d", result.TotalTransactionsProcessed)
 				}
 				if result.TotalMatchedTransactions != 0 {
 					t.Errorf("Expected 0 matched transactions, got %d", result.TotalMatchedTransactions)
@@ -533,8 +533,8 @@ BANK-003,3000.00,2024-12-25`), 0644)
 			endDate:       mustParseTime("2024-12-31 23:59:59"),
 			expectedError: false,
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 3 {
-					t.Errorf("Expected 3 transactions processed, got %d", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 6 {
+					t.Errorf("Expected 6 transactions processed, got %d", result.TotalTransactionsProcessed)
 				}
 			},
 		},
@@ -576,8 +576,8 @@ BANK-001,1000.00,2024-01-15`), 0644)
 			endDate:       mustParseTime("2024-01-15 23:59:59"),
 			expectedError: false,
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 1 {
-					t.Errorf("Expected 1 transaction processed on same day, got %d", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 2 {
+					t.Errorf("Expected 2 transactions processed on same day, got %d", result.TotalTransactionsProcessed)
 				}
 			},
 		},
@@ -601,8 +601,8 @@ BANK-002,2000.00,2024-01-16`), 0644)
 			expectedError: false,
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
 				// Should only process transactions on 2024-01-15, not 2024-01-16
-				if result.TotalTransactionsProcessed != 1 {
-					t.Errorf("Expected 1 transaction when end date defaults to start date, got %d", result.TotalTransactionsProcessed)
+				if result.TotalTransactionsProcessed != 2 {
+					t.Errorf("Expected 2 transactions when end date defaults to start date, got %d", result.TotalTransactionsProcessed)
 				}
 			},
 		},
@@ -625,7 +625,7 @@ BANK-002,2000.00,2024-01-31`), 0644)
 			endDate:       mustParseTime("2024-01-31 23:59:59"),
 			expectedError: false,
 			expectedResult: func(t *testing.T, result *models.ReconciliationResult) {
-				if result.TotalTransactionsProcessed != 2 {
+				if result.TotalTransactionsProcessed != 4 {
 					t.Errorf("Expected both boundary transactions to be included, got %d transactions processed", result.TotalTransactionsProcessed)
 				}
 			},

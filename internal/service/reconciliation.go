@@ -32,9 +32,9 @@ type ReconciliationInput struct {
 
 // Reconcile performs the reconciliation process
 func (s *ReconciliationService) Reconcile(input ReconciliationInput) (*models.ReconciliationResult, error) {
-	// If end date is not provided (zero value), set it to start date
+	// If end date is not provided (zero value), set it to end of start date
 	if input.EndDate.IsZero() {
-		input.EndDate = input.StartDate
+		input.EndDate = input.StartDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 	}
 
 	// Validate date range
@@ -80,6 +80,8 @@ func (s *ReconciliationService) performReconciliation(
 	matchStrategy MatchStrategy,
 ) *models.ReconciliationResult {
 	result := &models.ReconciliationResult{
+		TotalSystemTransactions:     len(systemTxs),
+		TotalBankStatementLines:     len(bankStmts),
 		UnmatchedBankStatementLines: make(map[string][]models.BankStatementLine),
 		TotalDiscrepancies:          decimal.Zero,
 	}
@@ -153,7 +155,7 @@ func (s *ReconciliationService) performReconciliation(
 	}
 
 	// Calculate totals
-	result.TotalTransactionsProcessed = max(len(systemTxs), len(bankStmts))
+	result.TotalTransactionsProcessed = len(systemTxs) + len(bankStmts)
 	result.TotalUnmatchedTransactions = len(result.UnmatchedSystemTransactions)
 	for _, stmts := range result.UnmatchedBankStatementLines {
 		result.TotalUnmatchedTransactions += len(stmts)
