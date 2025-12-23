@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/shopspring/decimal"
 
@@ -24,8 +25,8 @@ func main() {
 	var (
 		fSystemFile = flag.String("system", "", "Path to system transactions CSV file (required)")
 		fBankFiles  = flag.String("banks", "", "Comma-separated paths to bank statement CSV files (required)")
-		fStartDate  = flag.String("start", "", "Start date for reconciliation (YYYY-MM-DD) (required)")
-		fEndDate    = flag.String("end", "", "End date for reconciliation (YYYY-MM-DD) (optional, defaults to start date)")
+		fStartDate  = flag.String("start", "", "Start date for reconciliation (YYYY-MM-DD)in UTC+7 (required)")
+		fEndDate    = flag.String("end", "", "End date for reconciliation (YYYY-MM-DD) in UTC+7 (optional, defaults to start date)")
 		fOutputFile = flag.String("output", "", "Path to output file, only support txt at the moment. (optional)")
 	)
 
@@ -53,15 +54,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Load timezone for parsing (use UTC+7 to match parser behavior)
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		loc = time.FixedZone("UTC+7", 7*60*60)
+	}
+
 	// Parse dates
-	start, err := time.Parse(DEFAULT_DATE_FORMAT, startDate)
+	start, err := time.ParseInLocation(DEFAULT_DATE_FORMAT, startDate, loc)
 	if err != nil {
 		log.Fatalf("Invalid start date format: %v. Expected format: YYYY-MM-DD", err)
 	}
 
 	var end time.Time
 	if endDate != "" {
-		end, err = time.Parse(DEFAULT_DATE_FORMAT, endDate)
+		end, err = time.ParseInLocation(DEFAULT_DATE_FORMAT, endDate, loc)
 		if err != nil {
 			log.Fatalf("Invalid end date format: %v. Expected format: YYYY-MM-DD", err)
 		}
