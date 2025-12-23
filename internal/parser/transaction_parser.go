@@ -50,8 +50,8 @@ func (p *TransactionParser) ParseCSV(filePath string) ([]models.Transaction, err
 			return nil, fmt.Errorf("invalid amount at row %d: %w", i+2, err)
 		}
 
-		txType := models.TransactionType(strings.ToUpper(record[transactionColType]))
-		if txType != models.TransactionTypeDebit && txType != models.TransactionTypeCredit {
+		trxType := models.TransactionType(strings.ToUpper(record[transactionColType]))
+		if trxType != models.TransactionTypeDebit && trxType != models.TransactionTypeCredit {
 			return nil, fmt.Errorf("invalid transaction type at row %d: %s", i+2, record[transactionColType])
 		}
 
@@ -64,7 +64,7 @@ func (p *TransactionParser) ParseCSV(filePath string) ([]models.Transaction, err
 		transactions = append(transactions, models.Transaction{
 			TrxID:           record[transactionColTrxID],
 			Amount:          amount,
-			Type:            txType,
+			Type:            trxType,
 			TransactionTime: transactionTime,
 		})
 	}

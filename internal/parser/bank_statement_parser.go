@@ -10,27 +10,27 @@ import (
 	"github.com/firmannf/recon/internal/models"
 )
 
-// BankStatementLineParser handles parsing of bank statement CSV files
-type BankStatementLineParser struct {
+// BankStatementParser handles parsing of bank statement CSV files
+type BankStatementParser struct {
 	timezone *time.Location
 }
 
-// NewBankStatementLineParser creates a new BankStatementLineParser with UTC+7 timezone
-func NewBankStatementLineParser() *BankStatementLineParser {
+// NewBankStatementParser creates a new BankStatementParser with UTC+7 timezone
+func NewBankStatementParser() *BankStatementParser {
 	// Load Asia/Jakarta timezone (UTC+7) by default
 	loc, err := time.LoadLocation("Asia/Jakarta")
 	if err != nil {
 		// Fallback to fixed offset if timezone database unavailable
 		loc = time.FixedZone("UTC+7", 7*60*60)
 	}
-	return &BankStatementLineParser{
+	return &BankStatementParser{
 		timezone: loc,
 	}
 }
 
 // ParseCSV reads and parses a bank statement CSV file
 // Expected CSV format: unique_identifier,amount,date
-func (p *BankStatementLineParser) ParseCSV(filePath string) ([]models.BankStatementLine, error) {
+func (p *BankStatementParser) ParseCSV(filePath string) ([]models.BankStatementLine, error) {
 	records, err := readCSVFile(filePath)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (p *BankStatementLineParser) ParseCSV(filePath string) ([]models.BankStatem
 }
 
 // ParseMultipleCSVs reads and parses multiple bank statement CSV files
-func (p *BankStatementLineParser) ParseMultipleCSVs(filePaths []string) ([]models.BankStatementLine, error) {
+func (p *BankStatementParser) ParseMultipleCSVs(filePaths []string) ([]models.BankStatementLine, error) {
 	var allStatements []models.BankStatementLine
 
 	for _, filePath := range filePaths {

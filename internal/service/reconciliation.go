@@ -11,13 +11,13 @@ import (
 
 type ReconciliationService struct {
 	transactionParser   *parser.TransactionParser
-	bankStatementParser *parser.BankStatementLineParser
+	bankStatementParser *parser.BankStatementParser
 }
 
 func NewReconciliationService() *ReconciliationService {
 	return &ReconciliationService{
 		transactionParser:   parser.NewTransactionParser(),
-		bankStatementParser: parser.NewBankStatementLineParser(),
+		bankStatementParser: parser.NewBankStatementParser(),
 	}
 }
 
@@ -75,12 +75,12 @@ func (s *ReconciliationService) Reconcile(input ReconciliationInput) (*models.Re
 }
 
 func (s *ReconciliationService) performReconciliation(
-	systemTxs []models.Transaction,
+	systemTrxs []models.Transaction,
 	bankStmts []models.BankStatementLine,
 	matchStrategy MatchStrategy,
 ) *models.ReconciliationResult {
 	result := &models.ReconciliationResult{
-		TotalSystemTransactions:     len(systemTxs),
+		TotalSystemTransactions:     len(systemTrxs),
 		TotalBankStatementLines:     len(bankStmts),
 		UnmatchedBankStatementLines: make(map[string][]models.BankStatementLine),
 		TotalDiscrepancies:          decimal.Zero,
@@ -95,11 +95,11 @@ func (s *ReconciliationService) performReconciliation(
 	}
 
 	// Track which statements have been matched
-	matchedSystemTxs := make(map[int]bool)
+	matchedsystemTrxs := make(map[int]bool)
 	matchedBankStmts := make(map[int]bool)
 
 	// Try to match each system transaction with bank statements
-	for sysIdx, sysTrx := range systemTxs {
+	for sysIdx, sysTrx := range systemTrxs {
 		matched := false
 
 		// Look up potential matches using index - O(1) instead of O(m)
@@ -118,7 +118,7 @@ func (s *ReconciliationService) performReconciliation(
 
 				// Found a match (first available candidate)
 				matched = true
-				matchedSystemTxs[sysIdx] = true
+				matchedsystemTrxs[sysIdx] = true
 				matchedBankStmts[bankIdx] = true
 				result.TotalMatchedTransactions++
 
@@ -155,7 +155,7 @@ func (s *ReconciliationService) performReconciliation(
 	}
 
 	// Calculate totals
-	result.TotalTransactionsProcessed = len(systemTxs) + len(bankStmts)
+	result.TotalTransactionsProcessed = len(systemTrxs) + len(bankStmts)
 	result.TotalUnmatchedTransactions = len(result.UnmatchedSystemTransactions)
 	for _, stmts := range result.UnmatchedBankStatementLines {
 		result.TotalUnmatchedTransactions += len(stmts)

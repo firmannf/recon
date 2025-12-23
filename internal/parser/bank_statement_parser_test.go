@@ -104,7 +104,7 @@ BANK-001,1000.00,15-01-2024`,
 				t.Fatalf("Failed to create test CSV: %v", err)
 			}
 
-			parser := parser.NewBankStatementLineParser()
+			parser := parser.NewBankStatementParser()
 			statements, err := parser.ParseCSV(csvPath)
 
 			if err != nil {
@@ -210,7 +210,7 @@ BANK-003,250.00,2024-01-17,2024-01-17`
 			tmpDir := t.TempDir()
 			csvPath := tt.setupFile(tmpDir)
 
-			parser := parser.NewBankStatementLineParser()
+			parser := parser.NewBankStatementParser()
 			_, err := parser.ParseCSV(csvPath)
 
 			if tt.shouldFail && err == nil {
@@ -283,7 +283,7 @@ BCA-001,1000.00,2024-01-15`
 			tmpDir := t.TempDir()
 			files := tt.setupFiles(tmpDir)
 
-			parser := parser.NewBankStatementLineParser()
+			parser := parser.NewBankStatementParser()
 			statements, err := parser.ParseMultipleCSVs(files)
 
 			if tt.shouldFail {
