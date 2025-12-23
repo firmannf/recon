@@ -249,8 +249,8 @@ BANK_BCA_002,-500.50,2024-01-17`), 0644)
 					t.Errorf("Expected 2 unmatched system transactions, got %d", len(result.UnmatchedSystemTransactions))
 				}
 				totalUnmatchedBank := 0
-				for _, stmts := range result.UnmatchedBankStatementLines {
-					totalUnmatchedBank += len(stmts)
+				for _, stmtLines := range result.UnmatchedBankStatementLines {
+					totalUnmatchedBank += len(stmtLines)
 				}
 				if totalUnmatchedBank != 2 {
 					t.Errorf("Expected 2 unmatched bank statements, got %d", totalUnmatchedBank)
@@ -288,8 +288,8 @@ BANK_BCA_002,1000.00,2024-01-15`), 0644)
 					t.Errorf("Expected 0 unmatched system transactions, got %d", len(result.UnmatchedSystemTransactions))
 				}
 				totalUnmatchedBank := 0
-				for _, stmts := range result.UnmatchedBankStatementLines {
-					totalUnmatchedBank += len(stmts)
+				for _, stmtLines := range result.UnmatchedBankStatementLines {
+					totalUnmatchedBank += len(stmtLines)
 				}
 				if totalUnmatchedBank != 1 {
 					t.Errorf("Expected second bank statement to remain unmatched, got %d unmatched", totalUnmatchedBank)
@@ -331,8 +331,8 @@ BANK-004,6000.00,2024-01-20`), 0644)
 					t.Errorf("Expected 2 unmatched system transactions, got %d", len(result.UnmatchedSystemTransactions))
 				}
 				totalUnmatchedBank := 0
-				for _, stmts := range result.UnmatchedBankStatementLines {
-					totalUnmatchedBank += len(stmts)
+				for _, stmtLines := range result.UnmatchedBankStatementLines {
+					totalUnmatchedBank += len(stmtLines)
 				}
 				if totalUnmatchedBank != 3 {
 					t.Errorf("Expected 3 unmatched bank statements, got %d", totalUnmatchedBank)
@@ -372,8 +372,8 @@ BANK_BCA_003,-500.50,2024-01-15`), 0644)
 					t.Errorf("Expected 0 unmatched system transactions, got %d", len(result.UnmatchedSystemTransactions))
 				}
 				totalUnmatchedBank := 0
-				for _, stmts := range result.UnmatchedBankStatementLines {
-					totalUnmatchedBank += len(stmts)
+				for _, stmtLines := range result.UnmatchedBankStatementLines {
+					totalUnmatchedBank += len(stmtLines)
 				}
 				if totalUnmatchedBank != 1 {
 					t.Errorf("Expected 1 unmatched bank statement, got %d", totalUnmatchedBank)
@@ -413,8 +413,8 @@ BANK_BCA_003,-500.50,2024-01-15`), 0644)
 					t.Errorf("Expected 1 unmatched system transactions, got %d", len(result.UnmatchedSystemTransactions))
 				}
 				totalUnmatchedBank := 0
-				for _, stmts := range result.UnmatchedBankStatementLines {
-					totalUnmatchedBank += len(stmts)
+				for _, stmtLines := range result.UnmatchedBankStatementLines {
+					totalUnmatchedBank += len(stmtLines)
 				}
 				if totalUnmatchedBank != 0 {
 					t.Errorf("Expected 0 unmatched bank statement, got %d", totalUnmatchedBank)
@@ -464,8 +464,8 @@ MDR-001,3000.00,2024-01-15`), 0644)
 					t.Error("Expected unmatched statements from bank_mandiri")
 				}
 				totalUnmatchedBank := 0
-				for _, stmts := range result.UnmatchedBankStatementLines {
-					totalUnmatchedBank += len(stmts)
+				for _, stmtLines := range result.UnmatchedBankStatementLines {
+					totalUnmatchedBank += len(stmtLines)
 				}
 				if totalUnmatchedBank != 2 {
 					t.Errorf("Expected 2 unmatched bank statements, got %d", totalUnmatchedBank)

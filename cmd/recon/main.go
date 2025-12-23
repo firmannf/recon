@@ -219,8 +219,8 @@ func formatResult(w io.Writer, result *models.ReconciliationResult, params Recon
 		for bankName, statements := range result.UnmatchedBankStatementLines {
 			fmt.Fprintf(w, "\nBank: %s (%d transactions)\n", bankName, len(statements))
 			fmt.Fprintf(w, "%-20s %-10s %20s\n", "Unique Identifier", "Date", "Amount")
-			for _, stmt := range statements {
-				fmt.Fprintf(w, "%-20s %-10s %20s\n", stmt.UniqueIdentifier, stmt.Date.Format("2006-01-02"), fmt.Sprintf("Rp. %v", stmt.Amount.StringFixed(2)))
+			for _, stmtLines := range statements {
+				fmt.Fprintf(w, "%-20s %-10s %20s\n", stmtLines.UniqueIdentifier, stmtLines.Date.Format("2006-01-02"), fmt.Sprintf("Rp. %v", stmtLines.Amount.StringFixed(2)))
 			}
 		}
 	}

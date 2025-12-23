@@ -88,10 +88,10 @@ func (s *ReconciliationService) performReconciliation(
 
 	// Build index of bank statements by matching key for O(1) lookup
 	// Key format depends on strategy (e.g., "TYPE_AMOUNT_DATE", "TYPE_DATE", "ID", etc.)
-	bankStmtIndex := make(map[string][]int)
-	for bankIdx, bankStmt := range bankStmtLines {
-		key := matchStrategy.BuildKey(bankStmt.Type, bankStmt.GetAbsoluteAmount(), bankStmt.Date, bankStmt.UniqueIdentifier)
-		bankStmtIndex[key] = append(bankStmtIndex[key], bankIdx)
+	bankStmtLineIndex := make(map[string][]int)
+	for bankIdx, bankStmtLine := range bankStmtLines {
+		key := matchStrategy.BuildKey(bankStmtLine.Type, bankStmtLine.GetAbsoluteAmount(), bankStmtLine.Date, bankStmtLine.UniqueIdentifier)
+		bankStmtLineIndex[key] = append(bankStmtLineIndex[key], bankIdx)
 	}
 
 	// Track which statements have been matched
@@ -104,7 +104,7 @@ func (s *ReconciliationService) performReconciliation(
 
 		// Look up potential matches using index - O(1) instead of O(m)
 		key := matchStrategy.BuildKey(sysTrx.Type, sysTrx.Amount, sysTrx.TransactionTime, sysTrx.TrxID)
-		if candidates, exists := bankStmtIndex[key]; exists {
+		if candidates, exists := bankStmtLineIndex[key]; exists {
 			for _, bankIdx := range candidates {
 				// Skip already matched bank statements
 				if matchedBankStmtLines[bankIdx] {
@@ -142,14 +142,14 @@ func (s *ReconciliationService) performReconciliation(
 	}
 
 	// Collect unmatched bank statement lines grouped by bank
-	for bankIdx, bankStmt := range bankStmtLines {
+	for bankIdx, bankStmtLine := range bankStmtLines {
 		if !matchedBankStmtLines[bankIdx] {
-			if result.UnmatchedBankStatementLines[bankStmt.BankName] == nil {
-				result.UnmatchedBankStatementLines[bankStmt.BankName] = []models.BankStatementLine{}
+			if result.UnmatchedBankStatementLines[bankStmtLine.BankName] == nil {
+				result.UnmatchedBankStatementLines[bankStmtLine.BankName] = []models.BankStatementLine{}
 			}
-			result.UnmatchedBankStatementLines[bankStmt.BankName] = append(
-				result.UnmatchedBankStatementLines[bankStmt.BankName],
-				bankStmt,
+			result.UnmatchedBankStatementLines[bankStmtLine.BankName] = append(
+				result.UnmatchedBankStatementLines[bankStmtLine.BankName],
+				bankStmtLine,
 			)
 		}
 	}
@@ -157,8 +157,8 @@ func (s *ReconciliationService) performReconciliation(
 	// Calculate totals
 	result.TotalTransactionsProcessed = len(systemTrxs) + len(bankStmtLines)
 	result.TotalUnmatchedTransactions = len(result.UnmatchedSystemTransactions)
-	for _, stmts := range result.UnmatchedBankStatementLines {
-		result.TotalUnmatchedTransactions += len(stmts)
+	for _, stmtLines := range result.UnmatchedBankStatementLines {
+		result.TotalUnmatchedTransactions += len(stmtLines)
 	}
 
 	return result
@@ -176,9 +176,9 @@ func (s *ReconciliationService) filterTransactionsByDateRange(transactions []mod
 
 func (s *ReconciliationService) filterBankStatementsByDateRange(statementLines []models.BankStatementLine, startDate, endDate time.Time) []models.BankStatementLine {
 	var filtered []models.BankStatementLine
-	for _, stmt := range statementLines {
-		if !stmt.Date.Before(startDate) && !stmt.Date.After(endDate) {
-			filtered = append(filtered, stmt)
+	for _, stmtLine := range statementLines {
+		if !stmtLine.Date.Before(startDate) && !stmtLine.Date.After(endDate) {
+			filtered = append(filtered, stmtLine)
 		}
 	}
 	return filtered
