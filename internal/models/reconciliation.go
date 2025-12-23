@@ -34,8 +34,8 @@ func (r *ReconciliationResult) Print() {
 		fmt.Printf("UNMATCHED SYSTEM TRANSACTIONS: %d\n", len(r.UnmatchedSystemTransactions))
 		fmt.Println(strings.Repeat("-", 80))
 		fmt.Printf("%-20s %-10s %-25s %20s \n", "TrxID", "Type", "Transaction Time", "Amount")
-		for _, tx := range r.UnmatchedSystemTransactions {
-			fmt.Printf("%-20s %-10s %-25s %20s\n", tx.TrxID, tx.Type, tx.TransactionTime.Format("2006-01-02 15:04:05"), fmt.Sprintf("Rp. %v", tx.Amount.StringFixed(2)))
+		for _, trx := range r.UnmatchedSystemTransactions {
+			fmt.Printf("%-20s %-10s %-25s %20s\n", trx.TrxID, trx.Type, trx.TransactionTime.Format("2006-01-02 15:04:05"), fmt.Sprintf("Rp. %v", trx.Amount.StringFixed(2)))
 		}
 	}
 
