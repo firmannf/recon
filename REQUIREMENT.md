@@ -8,14 +8,18 @@
 
 ### Additional Assumption
 - Each bank provides statements in standardized CSV format
-- Transaction can only be one day difference (cutoff time)
+- System transaction data is in standardized CSV format
 - All date are using UTC+7
+- All amount are using Indonesian Rupiah
 - One CSV can contains multiple date transactions
-- Transaction has one-to-one relationship
-- Transaction matching is based on date (±1 day for cutoff time) and amount
-- Transaction type (CREDIT, DEBIT) in internal data same with bank's point of view
+- Transaction only has one-to-one relationship
+- Transaction IDs between system and bank cannot be relied upon for matching
+- Transaction matching is based on amount since
+- Transactions are reconciled within the same calendar date unless later introduced function for handling cutoff period time
+- Transaction type (CREDIT, DEBIT) in system transaction data are the same with bank's point of view (Credit +, Debit -)
+- A discrepancy is defined as an amount difference between matched transactions, however since amount is used for matching, this value should be zero unless a tolerance-based strategy is later introduced
 - System handles multiple banks in a single reconciliation run
-
+  
 ---
 
 ## User Stories
@@ -48,7 +52,7 @@ THEN the system should detect the file access error
 ```
 
 ```
-GIVEN a file path with non CSV ectention
+GIVEN a file path with non CSV extension
 WHEN the system attempts to open the file
 THEN the system should not proceed with reconciliation
     AND the system should display a clear error message
@@ -67,7 +71,7 @@ GIVEN a system transaction data with type "CREDIT", date "2024-01-15", amount "1
     AND a bank statement data with amount "1000.00", date "2024-01-15"
 WHEN the system performs matching
 THEN the transactions should be matched
-    AND the match should be based on type, date, and amount
+    AND the match should be based on date and amount
 ```
 
 ```
@@ -87,13 +91,6 @@ THEN the system should classify it as "CREDIT"
 ```
 GIVEN a system transaction data TRX001 with amount "1000.00" on "2024-01-15"
     AND bank statements BANK_BCA_001 with amount "1000.00" on "2024-01-16" (one day difference)
-WHEN the system performs matching
-THEN TRX001 should match with BANK_BCA_001
-```
-
-```
-GIVEN a system transaction data TRX001 with amount "1000.00" on "2024-01-15"
-    AND bank statements BANK_BCA_001 with amount "1000.00" on "2024-01-17" (two day difference)
 WHEN the system performs matching
 THEN TRX001 should unmatch with BANK_BCA_001
 ```
@@ -126,18 +123,18 @@ THEN the report should display "Total Unmatched Transactions: 5"
 ```
 
 ```
-GIVEN a system transaction data TRX999 with amount "3000.00"
+GIVEN a system transaction data TRX001 with amount "3000.00"
     AND no matching bank statement exists
 WHEN the reconciliation completes
-THEN TRX999 should be identified as unmatched
+THEN TRX001 should be identified as unmatched
     AND it should appear in the "Unmatched System Transactions" section
 ```
 
 ```
-GIVEN a bank statement BANK_BCA_999 with amount "1500.00"
+GIVEN a bank statement BANK_BCA_001 with amount "1500.00"
     AND no matching system transaction exists
 WHEN the reconciliation completes
-THEN BANK_BCA_999 should be identified as unmatched
+THEN BANK_BCA_001 should be identified as unmatched
     AND it should appear in the "Unmatched Bank Statements" section
 ```
 
@@ -167,9 +164,21 @@ THEN statements should be grouped under bank headers
 ```
 
 ```
-GIVEN discrepancies totaling "1000.00"
+GIVEN all matched transactions
 WHEN the report is generated
-THEN the report should display "Total Discrepancies: 1000.00"
+THEN the report should display "Total Discrepancies: 0"
+```
+
+```
+GIVEN an unmatched system transaction
+WHEN the report is generated
+THEN the report should display "Total Discrepancies: 0"
+```
+
+```
+GIVEN an unmatched bank statements
+WHEN the report is generated
+THEN the report should display "Total Discrepancies: 0"
 ```
 
 ### As a finance officer, I want to reconcile transactions with specific date range only, So that I can check discrepancy more specific
@@ -223,9 +232,9 @@ THEN the system only log the results in the console
 ---
 
 ## Non-Functional Requirements
-- System can be run in console only
+- System can be run in console application and input files provided via arguments
 - Runs on macOS, Linux, and Windows
-- Requires Go 1.21 or higher
+- Requires Go 1.23 or higher
 - No external system dependencies
 - Single binary deployment
   
