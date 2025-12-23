@@ -22,7 +22,7 @@ type Transaction struct {
 	TransactionTime time.Time
 }
 
-// BankStatementLine represents a bank statement line
+// BankStatementLine represents an entry in bank statement file
 type BankStatementLine struct {
 	UniqueIdentifier string
 	Amount           decimal.Decimal // Can be negative for debit
