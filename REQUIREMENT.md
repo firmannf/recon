@@ -251,4 +251,14 @@ THEN the system only log the results in the console
 ---
 
 ## Future Improvements
-  
+
+### Performance and Scalability
+- **Streaming Processing**: Support streaming large files instead of loading entire files into memory
+- **Batch Processing**: Support processing large CSV files (millions of rows) in batches to reduce memory consumption and
+- **Parallel Processing**: Implement concurrent processing for multiple bank files to improve reconciliation speed
+- **Database Integration**: Add support for reading transactions directly from databases instead of CSV files
+
+### Matching Algorithm Enhancements
+- **Tolerance Matching**: Introduce tolerance-based matching (e.g., match if amount difference is within 0.01%, or match if day difference is only one to support cutoff cases)
+- **Multi-Field Matching**: Support matching based on combinations of fields (amount + reference number, date + reference number, etc)
+- **Many-to-One Matching**: Support scenarios where multiple system transactions match a single bank statement (or vice versa)

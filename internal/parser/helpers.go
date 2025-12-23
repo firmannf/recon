@@ -67,7 +67,7 @@ func readCSVFile(filePath string) ([][]string, error) {
 	// Read CSV
 	reader := csv.NewReader(file)
 
-	// TODO: This load all records into memory
+	// TODO: Improve this because this load all records into memory
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read CSV: %w", err)
