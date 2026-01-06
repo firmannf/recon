@@ -248,6 +248,7 @@ THEN the system only log the results in the console
 - Requires Go 1.23 or higher
 - No external system dependencies
 - Single binary deployment
+- System shall support processing bank statement files up to 10MB.
 
 ---
 
